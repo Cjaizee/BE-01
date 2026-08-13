@@ -6,7 +6,7 @@ app = FastAPI()
 class TaskCreate(BaseModel):
     title: str | None = None
     done: bool | None = None
-
+    
     
 tasks = [{"id": 1,"title": "Job","done": False}, 
          {"id": 2,"title": "Fly","done": True}, 
