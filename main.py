@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-
+import copy
 app = FastAPI()
 
 class TaskCreate(BaseModel):
@@ -8,10 +8,12 @@ class TaskCreate(BaseModel):
     done: bool | None = None
     
     
-tasks = [{"id": 1,"title": "Job","done": False}, 
+DEFAULT_TASKS = [{"id": 1,"title": "Job","done": False}, 
          {"id": 2,"title": "Fly","done": True}, 
          {"id": 3,"title": "AI","done": False},  
          ]
+
+tasks = copy.deepcopy(DEFAULT_TASKS)
 
 @app.get("/")
 def home():
@@ -21,16 +23,35 @@ def home():
             "endpoints": ["/tasks"] 
             }
 
-    
 @app.get("/health")
 def health():
     return{
         "status": "ok"
         }
     
+@app.get("/stats")
+async def stats():
+    total_tasks = len(tasks)
+    done_tasks = 0
+    for task in tasks:
+        if task["done"] == True:
+            done_tasks += 1
+    open_tasks = total_tasks - done_tasks
+    
+    return{
+        "total": total_tasks,
+        "done": done_tasks,
+        "open": open_tasks
+    }
+
 @app.get("/tasks")
-def get_tasks():
-    return tasks
+def get_tasks(done: bool  = None, search: str = None):    
+    result = tasks
+    if done is not None:
+        result = [task for task in result if task["done"] == done]
+    if search is not None:
+        result = [task for task in result if search.lower() in task["title"].lower()]
+    return result
 
 @app.get("/tasks/{id}")
 async def get_id(id: int):
@@ -53,6 +74,16 @@ async def create_task(task_data: TaskCreate):
     }
     tasks.append(new_task)
     return new_task
+
+@app.post("/reset")
+async def reset():
+    global tasks
+    tasks = copy.deepcopy(DEFAULT_TASKS)
+    return {
+        "message": "Success",
+        "tasks": tasks
+    }
+
 
 @app.put("/tasks/{id}")
 async def update_task(id: int, task_data: TaskCreate):

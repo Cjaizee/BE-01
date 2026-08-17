@@ -81,7 +81,8 @@ HTTP/1.1 204 No Content
 date: Thu, 13 Aug 2026 22:51:00 GMT
 server: uvicorn
 ```
-
+## The Mortality Experiment
+What I observed when I restarted the server/API, is that there is no way for the newly created or modified tasks to be saved anywhere in the program. This problem greatly emphasizes the necessity of a database.
 ## Interactive FastAPI Documentation
 
 With the server running, navigate to `http://127.0.0.1:8000/docs` in your browser to test endpoints using FastAPI's built-in interactive documentation.
